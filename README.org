@@ -1,2 +1,11 @@
 * =file_watcher=
 Run commands on file changes.
+* Installation
+** Python 2
+#+BEGIN_EXAMPLE
+pip install -r requirements.txt -r requirements2.txt
+#+END_EXAMPLE
+** Python 3
+#+BEGIN_EXAMPLE
+pip install -r requirements.txt
+#+END_EXAMPLE

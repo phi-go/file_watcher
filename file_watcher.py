@@ -1,12 +1,17 @@
+from __future__ import print_function
+from builtins import input
+import sys
 import os
-import shutil
 import queue
 import pexpect
 import time
 import yaml
-import sys
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+if sys.version_info[0] == 2:  # check for python major version
+    from backports.shutil_get_terminal_size import get_terminal_size
+else:
+    from shutil import get_terminal_size
 
 CONFIG_FILE_NAME = '.fw'
 
@@ -49,7 +54,7 @@ def load_config_file():
     try:
         with open(CONFIG_FILE_NAME, 'r') as config_file:
             return yaml.load(config_file)
-    except (yaml.YAMLError, FileNotFoundError) as exc:
+    except (yaml.YAMLError, IOError) as exc:  # IOError instead of FileNotFoundError to support Python 2.
         return {'commands': [], 'paths': {}}
 
 
@@ -136,15 +141,14 @@ def run_command(command):
 
 def run_commands(config, path_info):
     # TODO maybe current time and time measurement
-    sep_string = '='*shutil.get_terminal_size((80, 20)).columns
+    term_columns = get_terminal_size((80, 20)).columns
+    sep_string = '='*term_columns
     commands = config['commands']
     print(sep_string)
     for command in commands:
         print(">>>", command, ">>>")
-        t = time.process_time()
         run_command(command)
-        elapsed_time = time.process_time() - t
-        print("<<<", elapsed_time, "<<<")
+        print("<<<")
     print(sep_string)
 
 
@@ -152,7 +156,7 @@ def act_on_changed_file(config, changed_files):
     path = changed_files.get()  # blocking
     path_info = get_path_info(config, path)
     if not path_info:
-        path_info = set_path_info(path)
+        path_info = set_path_info(config, path)
     if path_info['execute']:
         run_commands(config, path_info)
 
