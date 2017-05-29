@@ -1,2 +1,2 @@
-# file_watcher
+* =file_watcher=
 Run commands on file changes.
